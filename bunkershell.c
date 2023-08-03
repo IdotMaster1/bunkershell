@@ -9,7 +9,13 @@ int entry = 1;
 char command[MAX_LENGTH];
 char line[200];
 
+// files
+char *histfile = ".histfile";
+
 int main() {
+
+    FILE *hf = fopen(histfile, "a"); // Open the histfile in append mode
+
     while (1) {
         char cwd[1024];
         if (getcwd(cwd, sizeof(cwd)) != NULL) {
@@ -44,6 +50,13 @@ int main() {
                 printf("Error executing command.\n");
             }
         }
+
+        fprintf(hf, "%s\n", command); // Write the command to histfile
+        fflush(hf);
+
     }
+
+    fclose(hf); // Close the histfile
+
     return 0;
 }
