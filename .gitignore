@@ -55,3 +55,6 @@ dkms.conf
 .histfile 
 bunkershell
 a.out
+
+.vscode
+.vscode/*
