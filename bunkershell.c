@@ -18,28 +18,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
-#define MAX_LENGTH 200
-
-int entry = 1;
-char command[MAX_LENGTH];
-char line[200];
-
-// files
-char *histfile = ".histfile";
+#include "bunkershell.h"
 
 int main() {
 
     FILE *hf = fopen(histfile, "a"); // Open the histfile in append mode
 
     while (1) {
-        char cwd[1024];
-        if (getcwd(cwd, sizeof(cwd)) != NULL) {
-            printf("%s$ ", cwd);
-        } else {
-            perror("getcwd() error");
-            return 1;
-        }
+
+    printf("$ ");
 
         // Get text from the terminal
         fgets(command, MAX_LENGTH, stdin);
@@ -47,23 +37,26 @@ int main() {
         // Remove the trailing newline character from the command
         command[strcspn(command, "\n")] = 0;
 
-        // Handle "cd" (change directory) command
-        if (strncmp(command, "cd ", 3) == 0) {
-            char *dir = command + 3; // get the directory
-            if (chdir(dir) == 0) {
-                printf("Changed directory to: %s\n", dir);
-            } else {
-                printf("Directory not found!\n");
-            }
-        } else {
-            FILE *output = popen(command, "r");
-            if (output) {
-                while (fgets(line, 199, output)) {
-                    printf("%5d: %s", entry++, line);
+        // tokenize the command
+        token = strtok(command, " ");
+        while (token != NULL){
+            args[arg_count++] = token;
+            token = strtok(NULL, " ");
+        }
+
+        // set the last part of "args" to NULL, as needed by execvp
+        args[arg_count] = NULL;
+
+        if (fork() == 0) {
+            if (strncmp(command, "cd ", 3) == 0) {
+                char *dir = command + 3; // get the directory
+                if (chdir(dir) == 0) {
+                    printf("Changed directory to: %s\n", dir);
+                } else {
+                    perror(chdir);
                 }
-                pclose(output);
             } else {
-                printf("Error executing command.\n");
+                execvp(args[0], args);
             }
         }
 

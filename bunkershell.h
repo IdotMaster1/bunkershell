@@ -5,10 +5,12 @@
 
 int entry = 1;
 char command[MAX_LENGTH];
-char *tokens;
+char *token;
+char *args[MAX_LENGTH];
 char line[MAX_LENGTH];
+int arg_count = 0;
 
-// files
+// file realated things
 char *histfile = ".histfile";
 
 #endif
